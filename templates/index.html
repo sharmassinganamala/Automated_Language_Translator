@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Translator</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: url('https://thumbs.dreamstime.com/z/language-translator-banner-hand-draw-doodle-backgrou-background-concept-translating-agency-interpreting-129576416.jpg') no-repeat center center fixed; 
+            background-size: cover; 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            color: #333; 
+        }
+        .overlay {
+            background-color: black; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: white;
+        }
+        textarea, select, button { 
+            width: 100%; 
+            padding: 10px; 
+            margin-top: 10px; 
+            font-size: 16px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+        }
+        button { 
+            background-color: #007bff; 
+            color: white; 
+            cursor: pointer; 
+            font-weight: bold; 
+            border: none; 
+        }
+        button:hover { 
+            background-color: #0056b3; 
+        }
+        .output { 
+            margin-top: 20px; 
+            padding: 15px; 
+            background-color: #e9ecef; 
+            border-radius: 8px; 
+            font-size: 18px; 
+            color: #333; 
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay">
+        <h1>AUTOMATED LANGUAGE TRANSLATION</h1>
+        <textarea id="textInput" rows="4" placeholder="Enter text to translate"></textarea>
+        <select id="languageSelect">
+            <option value="" disabled selected>Select language</option>
+            {% for code, lang in languages.items() %}
+                <option value="{{ code }}">{{ lang }}</option>
+            {% endfor %}
+        </select>
+        <button onclick="translateText()">Translate</button>
+        <div id="output" class="output" hidden></div>
+    </div>
+
+    <script>
+        async function translateText() {
+            const text = document.getElementById('textInput').value;
+            const dest_language = document.getElementById('languageSelect').value;
+            
+            if (!text) {
+                alert("Please enter text to translate.");
+                return;
+            }
+            if (!dest_language) {
+                alert("Please select a destination language.");
+                return;
+            }
+
+            const response = await fetch('/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, dest_language })
+            });
+
+            const result = await response.json();
+            const outputDiv = document.getElementById('output');
+
+            if (response.ok) {
+                outputDiv.textContent = "Translated text: " + result.translated_text;
+                outputDiv.hidden = false;
+            } else {
+                outputDiv.innerHTML = `
+                    <p>Error: ${result.error}</p>
+                    <p>Supported Languages:</p>
+                    <ul>${Object.entries(result.supported_languages).map(([code, lang]) => `<li>${code}: ${lang}</li>`).join('')}</ul>
+                `;
+                outputDiv.hidden = false;
+            }
+        }
+    </script>
+</body>
+</html>
