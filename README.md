@@ -1,4 +1,4 @@
-# Automated Language Translation
+# Language Translation
 
 This is a simple web-based application that translates user-provided text into different languages using Google Translate API.
 
